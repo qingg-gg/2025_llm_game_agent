@@ -24,18 +24,21 @@ class ParserAgent(BaseAgent):
             - {{"action": "move", "target": "<地點名稱>"}}
             - {{"action": "explore"}}
             - {{"action": "talk", "target": "<NPC 代號或名稱>"}}
-            - {{"action": "use", "object": "<物品名稱>", "target": "<NPC 代號或名稱（可省略）>"}}
+            - {{"action": "use", "object": "<物品名稱>"}}
+            - {{"action": "choose", "choice": "<是否接受>"}}
             
             說明：
-            - "action" 為固定的英文單字，只能使用 "move"、"explore"、"talk"、"use" 其中之一
+            - "action" 為固定的英文單字，只能使用 "move"、"explore"、"talk"、"use"、"choose" 其中之一
             - "target"、"object" 請直接使用玩家輸入中出現的名稱或稱呼
+            - "choice" 請依照玩家的語意使用 "接受" 或 "拒絕"
             - 不需要檢查該地點、NPC 或物品是否存在
             - 不需要嘗試將名稱翻譯成英文或內部代碼
             
             範例（僅供理解，不代表唯一合法值）：
             - 「去教室」的結構化指令為 {{"action": "move", "target": "教室"}}
             - 「跟老師說話」的結構化指令為 {{"action": "talk", "target": "老師"}}
-            - 「把鑰匙交給他」的結構化指令為 {{"action": "use", "object": "鑰匙"}}
+            - 「使用鑰匙開門」的結構化指令為 {{"action": "use", "object": "鑰匙"}}
+            - 「拒絕老師」的結構化指令為 {{"action": "choose", "choice": "拒絕"}}
             
             玩家輸入：「{user_input}」
             
