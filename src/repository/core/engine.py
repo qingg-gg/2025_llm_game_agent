@@ -1,12 +1,15 @@
 """
-遊戲引擎
+遊戲引擎：
+    1. 執行所有遊戲邏輯、機制
+    2. 處理玩家的行動（移動、探索、對話、使用、選擇）
+    3. 檢查遊戲目前狀態（玩家、A、B、C）
+    4. 特殊互動規則、機制（A、B）
 """
 
 from typing import Dict, Any
 
 from src.repository.core.state import GameState
 from src.ui.console import Color
-
 
 class GameEngine:
     """遊戲引擎，負責邏輯判斷、狀態轉換、結局判定"""
@@ -257,18 +260,17 @@ class GameEngine:
             self.state.npc_a["sanity"] -= 1
             return "A 面帶失望地看著你，深深嘆了一口氣。"
 
-
     def _check_self(self):
         """確認玩家的狀態"""
         if self.state.player_remember:
             self.state.game_over = True
-            self.state.ending = "ending_0_truth"
+            self.state.ending = "ending_1"
         if self.state.player_health <= 0:
             self.state.game_over = True
-            self.state.ending = "ending_1_sleep"
+            self.state.ending = "ending_2"
         if self.state.player_sanity <= 0:
             self.state.game_over = True
-            self.state.ending = "ending_2_suicide"
+            self.state.ending = "ending_3"
 
     def _check_npc_a(self):
         """確認 A 的狀態"""
@@ -276,7 +278,7 @@ class GameEngine:
             self.state.npc_a["collapsed"] = True
         if self.state.npc_a["talk_count"] >= 5 or self.state.npc_a["help_count"] >= 3:
             self.state.game_over = True
-            self.state.ending = "ending_3_get_along"
+            self.state.ending = "ending_4"
 
     def _check_npc_b(self):
         """確認 B 的狀態"""
@@ -284,7 +286,7 @@ class GameEngine:
             self.state.npc_b["collapsed"] = True
         if self.state.npc_b["talk_count"] >= 5:
             self.state.game_over = True
-            self.state.ending = "ending_3_get_along"
+            self.state.ending = "ending_4"
 
     def _check_npc_c(self):
         """確認 C 的狀態"""
@@ -293,7 +295,7 @@ class GameEngine:
         if self.state.npc_c["sanity"] <= 0:
             self.state.npc_c["collapsed"] = True
             self.state.game_over = True
-            self.state.ending = "ending_4_mad_c"
+            self.state.ending = "ending_5"
         if self.state.npc_c["true_color"]:
             self.state.game_over = True
             self.state.ending = "ending_5_true_color"
