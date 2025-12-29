@@ -1,6 +1,6 @@
 ## 文字冒險遊戲（LLM API used）
 
-這個專案使用 NetDB Lab 提供的 LLM API，實作一套由兩個 Agent 協作的文字冒險遊戲引擎。
+這個專案使用 NetDB Lab 提供的 LLM API，實作一套由兩個 Agent 協作的文字冒險遊戲引擎。<br>
 本專案作為計算理論課程之期末報告使用，展示課程所學之有限狀態機運作情形。
 
 ### 功能
@@ -55,7 +55,7 @@ pip install -r requirements.txt
 ```
 python -m src.main
 ```
-執行程式後，會先於 CMD 提供操作介面的選擇（Console 或 Web）。
+執行程式後，會先於 CMD 提供操作介面的選擇（Console 或 Web）。<br>
 若選擇 Console，將於相同還境中啟動遊戲，而若選擇 Web，則會自動開啟瀏覽器（若開啟失敗，則可由使用者複製連結後，自行於瀏覽器中開啟）。
 
 ### License
