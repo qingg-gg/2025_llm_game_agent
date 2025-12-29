@@ -325,8 +325,9 @@ class GameEngine:
 
     def _check_npc_c(self):
         """確認 C 的狀態"""
-        if self.state.npc_c["other_talk_count"] >= 3:
+        if self.state.npc_c["other_talk_count"] == 3:
             self.state.npc_c["sanity"] -= 1
+            self.state.npc_c["other_talk_count"] = 0
         if self.state.npc_c["sanity"] <= 0:
             self.state.npc_c["collapsed"] = True
             self.state.game_over = True
