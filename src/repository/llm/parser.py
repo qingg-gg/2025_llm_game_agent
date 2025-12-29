@@ -16,32 +16,31 @@ class ParserAgent(BaseAgent):
     def parse_input(self, user_input: str) -> Dict[str, Any]:
         """解析玩家輸入，並回傳結構化指令字典"""
 
-        # 呼叫 LLM
         prompt = textwrap.dedent(f"""
             你是一個遊戲指令的解析助理，負責將玩家的自然語言轉換為結構化的遊戲指令。
-            
+
             請根據玩家的語意，產生最合理的一個指令，並使用以下 JSON 結構之一：
             - {{"action": "move", "target": "<地點名稱>"}}
             - {{"action": "explore"}}
             - {{"action": "talk", "target": "<NPC 代號或名稱>"}}
             - {{"action": "use", "object": "<物品名稱>"}}
             - {{"action": "choose", "choice": "<是否接受>"}}
-            
+
             說明：
             - "action" 為固定的英文單字，只能使用 "move"、"explore"、"talk"、"use"、"choose" 其中之一
             - "target"、"object" 請直接使用玩家輸入中出現的名稱或稱呼
             - "choice" 請依照玩家的語意使用 "接受" 或 "拒絕"
             - 不需要檢查該地點、NPC 或物品是否存在
             - 不需要嘗試將名稱翻譯成英文或內部代碼
-            
+
             範例（僅供理解，不代表唯一合法值）：
             - 「去教室」的結構化指令為 {{"action": "move", "target": "教室"}}
             - 「跟老師說話」的結構化指令為 {{"action": "talk", "target": "老師"}}
             - 「使用鑰匙開門」的結構化指令為 {{"action": "use", "object": "鑰匙"}}
             - 「拒絕老師」的結構化指令為 {{"action": "choose", "choice": "拒絕"}}
-            
+
             玩家輸入：「{user_input}」
-            
+
             請只回傳 JSON 格式的指令，不要包含任何其他文字、補充說明或 Markdown 標記。
         """)
         Color.print_colored("【Agent 解析中...】", Color.YELLOW)
@@ -53,6 +52,10 @@ class ParserAgent(BaseAgent):
 
         try:
             clean_response = response.replace("```json", "").replace("```", "").strip()
+            if not clean_response:
+                Color.print_colored("【JSON 解析失敗】 回應為空字串。", Color.RED)
+                Color.print_colored(f"【原始回應】 {repr(response)}", Color.YELLOW)
+
             command = json.loads(clean_response)
             Color.print_colored(f"【解析結果】 {command}", Color.GREEN)
             return command
@@ -61,20 +64,3 @@ class ParserAgent(BaseAgent):
             Color.print_colored(f"【JSON 解析失敗】 {e}", Color.RED)
             Color.print_colored(f"【原始回應】 {response}", Color.YELLOW)
             return {"action": "invalid"}
-
-    def _mock_response(self, prompt: str) -> str:
-        """不呼叫 LLM，根據關鍵字回傳預設內容"""
-        if "圖書館" in prompt:
-            return '{"action": "move", "target": "圖書館"}'
-        elif "探索" in prompt:
-            return '{"action": "explore"}'
-        elif "A" in prompt or "老師" in prompt or "班導" in prompt:
-            return '{"action": "talk", "target": "A"}'
-        elif "B" in prompt or "國中" in prompt:
-            return '{"action": "talk", "target": "B"}'
-        elif "C" in prompt:
-            return '{"action": "talk", "target": "C"}'
-        elif "麵包" in prompt:
-            return '{"action": "use", "object": "麵包"}'
-        else:
-            return '{"action": "explore"}'

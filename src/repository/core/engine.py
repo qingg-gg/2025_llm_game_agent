@@ -15,6 +15,7 @@ class GameEngine:
     """遊戲引擎，負責邏輯判斷、狀態轉換、結局判定"""
     def __init__(self):
         self.state = GameState()
+        self.llm_response = True
 
     def execute_action(self, command: Dict[str, Any]) -> str:
         """執行遊戲指令"""
@@ -33,6 +34,7 @@ class GameEngine:
         elif action == "choose":
             result = self._handle_choose(command.get("choice", ""))
         else:
+            self.llm_response = False
             result = "無法理解指令，請嘗試用更清楚的方式描述你的行動。"
 
         # 檢查特定機制是否被觸發
@@ -52,16 +54,26 @@ class GameEngine:
 
         # 地點不存在
         if target not in valid_locations:
+            self.llm_response = False
             return f"{target}是無法到達的，你能前往的地點有{valid_locations[0]}、{valid_locations[1]}、{valid_locations[2]}。"
 
         # 移動條件：第一次離開教室需使用鑰匙
         if not self.state.open_classroom:
-            return f"教室上鎖了，無法出去。「為什麼在教室裡需要鑰匙才能開鎖？」你疑惑地心想。"
+            return "教室上鎖了，無法出去。「為什麼在教室裡需要鑰匙才能開鎖？」你疑惑地心想。"
 
         # 移動
         self.state.player_location = target
         self.state.player_health -= 1
-        return f"你移動到了{target}。"
+        if self.state.npc_a["location"] == target and self.state.npc_c["location"] == target:
+            return "你移動到了{target}。你看見 A 跟 C 都出現在教室。他們並沒有主動朝你攀談，而是像個擺設一樣矗立著。"
+        if self.state.npc_a["location"] == target:
+            return f"你移動到了{target}，你看見 A 也在這裡。教師辦公室充滿書與試卷，有很重的油墨味。"
+        elif self.state.npc_b["location"] == target:
+            return f"你移動到了{target}，你看見 B 也在這裡。福利社裡雖有商品陳列，但沒有其他客人，也沒有店員。"
+        elif self.state.npc_c["location"] == target:
+            return f"你移動到了{target}，你看見 C 也在這裡。他一個人坐在書架旁安靜地閱讀科幻小說。"
+        else:
+            return f"你移動到了{target}。"
 
     def _handle_explore(self) -> str:
         """處理探索指令"""
@@ -72,27 +84,32 @@ class GameEngine:
         if location == "教室":
             if not self.state.open_classroom:
                 self.state.inventory.append("鑰匙")
-                return "你找到了一副鑰匙。"
+                return "你找到了一副鑰匙，看起來與門鎖相符。"
             elif not self.state.find_microphone and self.state.npc_a["talk_count"] == 4:
                 self.state.find_microphone = True
-                return "你找到了老師的麥克風。"
+                return "你找到了 A 請你幫忙拿的麥克風，他現在在教師辦公室等你交還給他。"
             else:
+                self.llm_response = False
                 return "教室裡沒有什麼特別的。"
 
         # 圖書館
         if location == "圖書館":
             if self.state.player_sanity == 1 and "A 的疑問" in self.state.inventory and "B 的疑問" in self.state.inventory:
                 self.state.inventory.append("遺書")
+                self.llm_response = False
                 return "你找到了一封遺書，署名是⋯⋯"
             else:
+                self.llm_response = False
                 return "圖書館裡沒有什麼特別的。"
 
         # 福利社
         if location == "福利社":
             if "麵包" not in self.state.inventory and self.state.num_bread > 0:
                 self.state.num_bread -= 1
-                return "你找到了一塊麵包。"
+                self.state.inventory.append("麵包")
+                return "你找到了一塊麵包，並且小心翼翼地收藏它。"
             else:
+                self.llm_response = False
                 return "福利社裡沒有什麼特別的。"
 
         # 教師辦公室
@@ -103,30 +120,31 @@ class GameEngine:
         """處理對話指令"""
         target = target.upper()
         if target not in ["A", "B", "C"]:
+            self.llm_response = False
             return f"{target}並不在校園裡，你能交談的對象有 A、B、C。"
 
         # A
         if target == "A" and self.state.player_location == self.state.npc_a["location"]:
             if self.state.npc_a["collapsed"]:
+                self.llm_response = False
                 return "A 已經不願意再與你交談了。"
 
             # 提出請求
             if not self.state.npc_a["wait_for_response"]:
                 self.state.npc_a["talk_count"] += 1
                 self.state.npc_c["other_talk_count"] += 1
-                prefix = "A 和你聊了一些班級的話題，他似乎很滿意你的表現。\n"
-                suffix = "\n你要接受 A 的請求嗎？"
+                suffix = "，你思考著，還沒做出答覆。"
                 match self.state.npc_a["talk_count"]:
                     case 1:
-                        return prefix + self._a_request(request_id = 1) + suffix
+                        return self._a_request(request_id = 1) + suffix
                     case 2:
-                        return prefix + self._a_request(request_id = 2) + suffix
+                        return self._a_request(request_id = 2) + suffix
                     case 3:
-                        return prefix + self._a_request(request_id = 3) + suffix
+                        return self._a_request(request_id = 3) + suffix
                     case 4:
-                        return prefix + self._a_request(request_id = 4) + suffix
+                        return self._a_request(request_id = 4) + suffix
                     case 5:
-                        return prefix + self._a_request(request_id = 5) + suffix
+                        return self._a_request(request_id = 5) + suffix
 
         # B
         if target == "B"  and self.state.player_location == self.state.npc_b["location"]:
@@ -155,28 +173,30 @@ class GameEngine:
         # C
         if target == "C" and self.state.player_location == self.state.npc_c["location"]:
             self.state.npc_c["other_talk_count"] = 0
-            return "和 C 聊天時，總感到非常安心，他是最了解、最包容自己的人。"
+            return "C 和你介紹他正在看的書，跟 C 待在一起讓你感到非常平靜。"
 
         else:
+            self.llm_response = False
             return f"{target} 不在這裡，你得先找到他。"
 
     def _handle_use(self, item: str) -> str:
         """處理使用物品指令"""
         if item not in self.state.inventory:
-            return f"你沒有{item}可以使用。"
+            self.llm_response = False
+            return f"""你可以使用的物品有{"、".join(self.state.inventory)}。"""
 
         match item:
             case "鑰匙":
                 if self.state.player_location == "教室":
                     self.state.inventory.remove(item)
                     self.state.open_classroom = True
-                    return "你用鑰匙打開了教室的門。"
+                    return "你用鑰匙打開了教室的門，現在你終於可以離開教室了。"
             case "麵包":
                 self.state.inventory.remove(item)
                 self.state.player_health += 3
                 if self.state.player_health > 10:
                     self.state.player_health = 10
-                    return "你吃麵包來填飽肚子。"
+                return "你吃麵包來填飽肚子。"
             case "考卷":
                 if self.state.player_location == "教室":
                     self.state.inventory.remove(item)
@@ -226,16 +246,23 @@ class GameEngine:
             case "遺書":
                 if self.state.player_sanity == 1 and self.state.player_location == "教室":
                     self.state.player_remember = True
+                    self.llm_response = False
                     return "你想起了一切。"
                 else:
+                    prefix = ""
                     self.state.npc_c["true_color"] = True
-                    return "C 突然出現在面前，臉上掛著笑容，但眼神卻充滿掠奪的慾望。"
+                    if self.state.npc_c["location"] != self.state.player_location:
+                        self.state.npc_c["location"] = self.state.player_location
+                        prefix = "C 突然出現在你面前，"
+                    return prefix + "C 一語不發地直視你，過去和藹的面容變得相當冰冷。"
 
+        self.llm_response = False
         return f"{item}並沒有發揮任何作用。"
 
     def _handle_choose(self, choice: str) -> str:
         """處理選擇指令"""
         if not self.state.npc_a["wait_for_response"]:
+            self.llm_response = False
             return "現在沒有要回應的請求。"
 
         self.state.npc_a["wait_for_response"] = False
@@ -298,7 +325,7 @@ class GameEngine:
             self.state.ending = "ending_5"
         if self.state.npc_c["true_color"]:
             self.state.game_over = True
-            self.state.ending = "ending_5_true_color"
+            self.state.ending = "ending_6"
 
     def _a_request(self, request_id) -> str:
         """A 的五個請求"""
@@ -311,7 +338,7 @@ class GameEngine:
             case 3:
                 return "A 請你幫他到圖書館歸還書籍。"
             case 4:
-                return "A 說他把麥克風忘在教室裡了，請你去幫他拿回教師辦公室。"
+                return "A 把麥克風忘在教室裡了，請你幫他拿回教師辦公室。"
             case _:
                 return "A 請你去福利社幫他買咖啡。"
 

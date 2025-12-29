@@ -13,16 +13,12 @@ from src.ui.console import Color
 
 class BaseAgent:
     """Agent 的基礎類別，為 Parser 與 Narrator 的原型"""
-    def __init__(self, api_url: str, api_key: str, test: bool = False):
+    def __init__(self, api_url: str, api_key: str):
         self.api_url = api_url
         self.api_key = api_key
-        self.test = test
 
     def call_api(self, prompt: str, temperature: float = 0.3) -> Optional[str]:
         """呼叫 LLM，如果呼叫失敗會回傳 None"""
-        if self.test:
-            return self._mock_response(prompt)
-
         try:
             headers = {
                 "Authorization": f"Bearer {self.api_key}",
@@ -30,16 +26,24 @@ class BaseAgent:
             }
             data = {
                 "model": "gemma3:4b",
-                "messages": [{"role": "user", "content": prompt}],
+                "prompt": prompt,
                 "temperature": temperature,
-                "stream": False
+                "stream": True
             }
             Color.print_colored("【呼叫 LLM 中...】", Color.CYAN)
-            response = requests.post(self.api_url, headers = headers, json = data, timeout = 30)
+            response = requests.post(self.api_url, headers = headers, json = data, stream = True, timeout = (10, 60))
             response.raise_for_status()
-            result = response.json()
-            Color.print_colored("【回應成功！】", Color.GREEN)
-            return result["response"]
+            chunks = []
+            for line in response.iter_lines(decode_unicode = True):
+                if not line:
+                    continue
+                data = json.loads(line)
+                delta = data.get("response")
+                if delta:
+                    chunks.append(delta)
+                if data.get("done"):
+                    break
+            return "".join(chunks)
 
         except requests.exceptions.Timeout:
             Color.print_colored("【回應超時。】", Color.RED)
@@ -53,7 +57,3 @@ class BaseAgent:
         except Exception as e:
             Color.print_colored(f"【未知錯誤】 {e}", Color.RED)
             return None
-
-    def _mock_response(self, prompt: str) -> str:
-        """不呼叫 LLM，回傳預設內容，由子類別實作"""
-        pass
