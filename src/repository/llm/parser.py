@@ -9,7 +9,6 @@ import textwrap
 from typing import Dict, Any
 
 from src.repository.llm.base_model import BaseAgent
-from src.ui.console import Color
 
 class ParserAgent(BaseAgent):
     """Parser agent，將玩家的自然語言解析為結構化指令"""
@@ -43,24 +42,22 @@ class ParserAgent(BaseAgent):
 
             請只回傳 JSON 格式的指令，不要包含任何其他文字、補充說明或 Markdown 標記。
         """)
-        Color.print_colored("【Agent 解析中...】", Color.YELLOW)
+        self._log("【PARSER】", "解析語句...")
         response = self.call_api(prompt, temperature = 0.3)
 
         if response is None:
-            Color.print_colored("【解析失敗】 使用預設指令。", Color.RED)
+            self._log("【PARSER】", "解析失敗，使用預設指令。")
             return {"action": "invalid"}
 
         try:
             clean_response = response.replace("```json", "").replace("```", "").strip()
             if not clean_response:
-                Color.print_colored("【JSON 解析失敗】 回應為空字串。", Color.RED)
-                Color.print_colored(f"【原始回應】 {repr(response)}", Color.YELLOW)
+                self._log("【PARSER】", f"JSON 解析失敗，回應為空字串。\n原始回應{repr(response)}")
 
             command = json.loads(clean_response)
-            Color.print_colored(f"【解析結果】 {command}", Color.GREEN)
+            self._log("【PARSER】", f"解析成功！\n解析結果：{command}")
             return command
 
         except json.JSONDecodeError as e:
-            Color.print_colored(f"【JSON 解析失敗】 {e}", Color.RED)
-            Color.print_colored(f"【原始回應】 {response}", Color.YELLOW)
+            self._log("【PARSER】", f"JSON 解析失敗。\n原始回應{repr(response)}")
             return {"action": "invalid"}

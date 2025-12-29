@@ -6,21 +6,29 @@
     4. 特殊互動規則、機制（A、B）
 """
 
-from typing import Dict, Any
+from typing import Dict, Any, Optional, Callable
 
 from src.repository.core.state import GameState
-from src.ui.console import Color
 
 class GameEngine:
     """遊戲引擎，負責邏輯判斷、狀態轉換、結局判定"""
-    def __init__(self):
+    def __init__(self, logger: Optional[Callable[[str, str], None]] = None):
         self.state = GameState()
+        self.logger = logger or self._default_logger
         self.llm_response = True
+
+    def _log(self, level: str, message: str):
+        """內部日誌方法"""
+        self.logger(level, message)
+
+    def _default_logger(self, level: str, message: str):
+        """預設日誌"""
+        print(f"{level}　{message}")
 
     def execute_action(self, command: Dict[str, Any]) -> str:
         """執行遊戲指令"""
         action = command.get("action")
-        Color.print_colored("【執行指令...】", Color.YELLOW)
+        self._log("【ENGINE】", "執行指令...")
 
         # 判斷指令類型
         if action == "move":
@@ -43,7 +51,7 @@ class GameEngine:
         self._check_npc_b()
         self._check_npc_c()
 
-        Color.print_colored(f"【完成指令】 {result[:50]}", Color.GREEN)
+        self._log("【ENGINE】", f"完成指令！\n指令內容：{result[:50]}...")
         return result
 
     def _handle_move(self, target: str) -> str:
@@ -183,7 +191,7 @@ class GameEngine:
         """處理使用物品指令"""
         if item not in self.state.inventory:
             self.llm_response = False
-            return f"""你可以使用的物品有{"、".join(self.state.inventory)}。"""
+            return f"""你可以使用的物品有：{"、".join(self.state.inventory) if self.state.inventory else "無"}。"""
 
         match item:
             case "鑰匙":
@@ -271,13 +279,13 @@ class GameEngine:
             match self.state.npc_a["talk_count"]:
                 case 1:
                     self.state.inventory.append("考卷")
-                    return "A 將考卷遞給了你。"
+                    return "A 將考卷遞給了你，請你放在教室講台。"
                 case 2:
                     self.state.inventory.append("公告")
-                    return "A 將公告細節告訴了你。"
+                    return "A 將公告細節告訴了你，請你一定要宣布完整的內容。"
                 case 3:
                     self.state.inventory.append("書籍")
-                    return "A 將書籍遞給了你。"
+                    return "A 將書籍遞給了你，並感謝你為他還書。"
                 case 4:
                     return "A 告訴你麥克風大概在教室的哪邊，並說他會在教師辦公室等你拿來。"
                 case 5:
@@ -332,17 +340,18 @@ class GameEngine:
         self.state.npc_a["wait_for_response"] = True
         match request_id:
             case 1:
-                return "A 請你幫他把下堂課要考的考卷拿到教室裡。"
+                return "A 問你是否能幫他把下堂課要考的考卷拿到教室裡。"
             case 2:
-                return "A 請你幫他到教室宣布一個公告。"
+                return "A 問你是否能幫他到教室宣布一個公告。"
             case 3:
-                return "A 請你幫他到圖書館歸還書籍。"
+                return "A 問你是否能幫他到圖書館歸還書籍。"
             case 4:
-                return "A 把麥克風忘在教室裡了，請你幫他拿回教師辦公室。"
+                return "A 把麥克風忘在教室裡了，問你是否能幫他拿回教師辦公室。"
             case _:
-                return "A 請你去福利社幫他買咖啡。"
+                return "A 問你是否能去福利社幫他買咖啡。"
 
-    def _b_mood(self, request_id) -> str:
+    @staticmethod
+    def _b_mood(request_id) -> str:
         """B 的五次談話"""
         match request_id:
             case 1:

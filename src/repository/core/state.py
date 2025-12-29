@@ -66,7 +66,19 @@ class GameState:
             "ending": self.ending
         }
 
-    def get_state_text(self):
+    def get_state_dict(self):
         """將狀態轉換為文字"""
-        inventory_str = "、".join(self.inventory) if self.inventory else "無"
-        return f"【體力】 {self.player_health} / 10\n【理智】 {self.player_sanity}\n【位置】 {self.player_location}\n【物品】 {inventory_str}"
+        return {
+            "location": self.player_location,
+            "health": self.player_health,
+            "max_health": 10,
+            "sanity": self.player_sanity,
+            "max_sanity": 5,
+            "inventory": self.inventory.copy(),
+            "npc_a_sanity": self.npc_a["sanity"],
+            "npc_b_sanity": self.npc_b["sanity"],
+            "npc_c_sanity": self.npc_c["sanity"],
+            "npc_a_collapsed": self.npc_a["collapsed"],
+            "npc_b_collapsed": self.npc_b["collapsed"],
+            "npc_c_collapsed": self.npc_c["collapsed"]
+        }

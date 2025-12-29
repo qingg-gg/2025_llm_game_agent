@@ -7,18 +7,16 @@ import textwrap
 
 from src.repository.core.state import GameState
 from src.repository.llm.base_model import BaseAgent
-from src.ui.console import Color
-
 
 class NarratorAgent(BaseAgent):
     """Narrator agent，根據前的遊戲狀態和行動結果產生故事"""
     def generate_story(self, game_state: GameState, action_result: str) -> str:
         """生成並回傳敘事文本"""
         sanity_suffix = ""
-        if game_state.player_sanity == 2:
+        if game_state.player_sanity <= 1:
+            sanity_suffix = "\n你感覺腦子亂七八糟，不知道如何思考才是對的，集中精神變得異常困難。"
+        elif game_state.player_sanity <= 2:
             sanity_suffix = "\n你覺得自己精神有點恍惚，似乎快分不清什麼是真實的、什麼是腦中的聲響。"
-        elif game_state.player_sanity <= 1:
-            sanity_suffix = "\n你感覺腦子亂七八糟，不知道如何思考才是對的，集中精神變得異常困難。。"
 
         # 呼叫 LLM
         prompt = textwrap.dedent(f"""
@@ -46,13 +44,15 @@ class NarratorAgent(BaseAgent):
             - 請以自然段落輸出
             - 只回傳故事文本，不要包含任何說明或標記
             - 不要使用在行動中沒有提及的人名
+            - 如果人名（A、B、C）出現在行動結果中，請在句子中提及
+            - 如果行動結果中出現「A 詢問你」，請用一句話讓 A 提出問題
         """)
-        Color.print_colored("【Agent 生成中...】", Color.YELLOW)
+        self._log("【NARRATOR】", "生成敘事...")
         response = self.call_api(prompt, temperature = 0.3)
 
         if response is None:
-            Color.print_colored("【生成失敗】 使用預設文本", Color.RED)
+            self._log("【NARRATOR】", "生成失敗，使用預設文本。")
             return action_result + sanity_suffix
 
-        Color.print_colored("【文本生成】", Color.GREEN)
+        self._log("【NARRATOR】", "生成成功！")
         return response.strip() + sanity_suffix
