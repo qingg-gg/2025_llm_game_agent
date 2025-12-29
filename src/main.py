@@ -23,7 +23,7 @@ def run_streamlit():
     try:
         subprocess.run([sys.executable, "-m", "streamlit", "run", path])
     except Exception as e:
-        print(f"無法請動 Streamlit\n錯誤訊息：{e}")
+        print(f"無法起動 Streamlit\n錯誤訊息：{e}")
 
 
 def main():

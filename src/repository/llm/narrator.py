@@ -3,6 +3,7 @@ Narrator agent（根據遊戲狀態與行動結果產生故事）：
     1. 根據遊戲狀態與行動結果，呼叫 LLM 後回傳文本
     2. 回傳預設內容
 """
+
 import textwrap
 
 from src.repository.core.state import GameState

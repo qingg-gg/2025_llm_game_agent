@@ -1,6 +1,8 @@
 """
 Streamlit UI 實作：
-    1.
+    1. Streamlit 日誌方法，用於確認功能是否正常運行
+    2. 設定 Streamlit 頁面框架、樣式、儲存資訊（Session state）
+    3. 設定個元件位置與功能（）
 """
 
 import streamlit as st
@@ -29,8 +31,8 @@ st.markdown("""
     </style>
 """, unsafe_allow_html = True)
 
-#  Session State
 def init_session_state():
+    """Session state，每次頁面更新時保留的資訊"""
     ss = st.session_state
     ss.setdefault("messages", [])
     ss.setdefault("game", None)
@@ -38,8 +40,8 @@ def init_session_state():
     ss.setdefault("api_key", os.environ.get("API_KEY", ""))
     ss.setdefault("api_url", os.environ.get("API_URL", ""))
 
-# Sidebar
 def render_sidebar():
+    """Sidebar 顯示內容"""
     with st.sidebar:
         st.title("遊 戲 狀 態")
 
@@ -85,8 +87,8 @@ def render_sidebar():
             if st.button("重 置 遊 戲", use_container_width = True):
                 reset_game()
 
-# Sidebar 操作
 def start_game():
+    """選擇「開始遊戲後」的頁面更動"""
     if not st.session_state.api_key:
         st.error("請輸入 API Key。")
         return
@@ -105,12 +107,14 @@ def start_game():
     st.rerun()
 
 def reset_game():
+    """選擇「重置遊戲」後的頁面更動"""
     st.session_state.game_started = False
     st.session_state.game = None
     st.session_state.messages.clear()
     st.rerun()
 
 def process_user_input(text: str):
+    """送出行動後的頁面更動"""
     st.session_state.messages.append(("user", text))
 
     with st.spinner("處理中⋯⋯"):
@@ -125,8 +129,8 @@ def process_user_input(text: str):
         )
     st.rerun()
 
-# Chat Box
 def render_main():
+    """Chatbox 顯示內容"""
     st.title("文字冒險遊戲 Interactive Fiction")
     st.caption("計算理論　期末報告")
 
@@ -139,8 +143,8 @@ def render_main():
         if user_input:
             process_user_input(user_input.replace("\n", "  \n  \n"))
 
-# Logger 設定
 def streamlit_logger(level: str, message: str):
+    """日誌方法"""
     print(f"{level}　{message}")
 
 def main():

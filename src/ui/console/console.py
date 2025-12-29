@@ -1,10 +1,12 @@
 """
 Console UI 實作：
-     1. Concole
+     1. Concole 日誌方法，用於確認功能是否正常運行
+     2. 設定 API 資訊
+     3. 顯示標題、開場、狀態、結尾
+     4. 控制遊戲流程
 """
 
 import sys
-import textwrap
 
 from src.repository.game_assemble import GameAssemble
 from src.ui.console.colors import Color
