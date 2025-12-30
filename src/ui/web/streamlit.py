@@ -23,7 +23,7 @@ st.markdown("""
     <style>
         [data-testid = "stMainBlockContainer"]{padding: 2rem 2rem 2rem; background: linear-gradient(180deg, #1a1a2e, #16213e, #0f0f1e);}
         [data-testid = "stMain"]{background: #0f0f1e;}
-        [data-testid = "stSidebar"]{background: linear-gradient(180deg, #667eea, #764ba2);}
+        [data-testid = "stSidebar"]{background: linear-gradient(180deg, #667eea, #A2D8F0);}
         [data-testid = "stSidebarHeader"]{display: none; color: #ffffff;}
         [data-testid = "stHeader"]{display: none;}
         [data-testid = "stHeadingWithActionElements"]{color: #ffffff;}
