@@ -21,13 +21,18 @@ st.set_page_config(
 # CSS
 st.markdown("""
     <style>
-        [data-testid = "stMainBlockContainer"]{
-            background: linear-gradient(180deg, #1a1a2e, #16213e, #0f0f1e);
-            padding: 2rem 3rem 5rem
-        }
+        [data-testid = "stMainBlockContainer"]{padding: 2rem 2rem 2rem; background: linear-gradient(180deg, #1a1a2e, #16213e, #0f0f1e);}
+        [data-testid = "stMain"]{background: #0f0f1e;}
         [data-testid = "stSidebar"]{background: linear-gradient(180deg, #667eea, #764ba2);}
-        [data-testid = "stSidebarHeader"]{display: none;}
+        [data-testid = "stSidebarHeader"]{display: none; color: #ffffff;}
         [data-testid = "stHeader"]{display: none;}
+        [data-testid = "stHeadingWithActionElements"]{color: #ffffff;}
+        [data-testid = "stCaptionContainer"]{color: #ffffff;}
+        [data-testid = "stHeading"]{color: #ffffff;}
+        [data-testid = "stWidgetLabel"]{color: #ffffff;}]
+        [data-testid = "stBottom"]{background-color: #0f0f1e !important;}
+        [data-testid = "stBottomBlockContainer"]{background-color: #0f0f1e !important;}
+        [data-testid = "stMarkdown"]{color: #ffffff;}
     </style>
 """, unsafe_allow_html = True)
 
@@ -37,8 +42,8 @@ def init_session_state():
     ss.setdefault("messages", [])
     ss.setdefault("game", None)
     ss.setdefault("game_started", False)
-    ss.setdefault("api_key", os.environ.get("API_KEY", ""))
     ss.setdefault("api_url", os.environ.get("API_URL", ""))
+    ss.setdefault("api_key", os.environ.get("API_KEY", ""))
 
 def render_sidebar():
     """Sidebar 顯示內容"""
@@ -78,10 +83,8 @@ def render_sidebar():
         st.divider()
 
         with st.expander("遊 戲 選 項", expanded = True):
+            st.session_state.api_url = st.text_input("API URL", value = st.session_state.api_url)
             st.session_state.api_key = st.text_input("API Key", value = st.session_state.api_key, type = "password")
-            st.session_state.api_url = st.text_input(
-                "API URL", value = st.session_state.api_url
-            )
             if st.button("開 始 遊 戲", use_container_width = True):
                 start_game()
             if st.button("重 置 遊 戲", use_container_width = True):
