@@ -33,6 +33,8 @@ st.markdown("""
         [data-testid = "stBottom"]{background-color: #0f0f1e !important;}
         [data-testid = "stBottomBlockContainer"]{background-color: #0f0f1e !important;}
         [data-testid = "stMarkdown"]{color: #ffffff;}
+        [data-testid = "stProgress"] [data-baseweb = "progress-bar"] > div > div {background-color: rgba(255,255,255,0.25) !important;}
+        [data-testid = "stProgress"] [data-baseweb = "progress-bar"] > div > div > div {background-color: #fdf281 !important;}
     </style>
 """, unsafe_allow_html = True)
 
