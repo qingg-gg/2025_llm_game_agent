@@ -26,6 +26,15 @@ class GameAssemble:
 
     def process_input(self, user_input: str) -> Dict[str, Any]:
         """處理玩家輸入"""
+        if user_input == "exit" or user_input == "quit" or user_input == "結束" or user_input == "離開":
+            self.engine.state.game_over = True
+            return {
+                "success": True,
+                "story": "",
+                "game_state": self.engine.state.get_state_dict(),
+                "game_over": self.engine.state.game_over,
+                "ending": self.engine.state.ending
+            }
         try:
             command = self.parser.parse_input(user_input)
             result = self.engine.execute_action(command)
@@ -162,4 +171,4 @@ class GameAssemble:
                 """)
             }
         }
-        return endings.get(ending, {"title": "【結局 0】", "description": "你被迫停止了思緒。"})
+        return endings.get(ending, {"title": "【中斷】", "description": "你停終止了遊戲。"})

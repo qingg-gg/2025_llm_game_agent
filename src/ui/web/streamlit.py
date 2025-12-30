@@ -125,7 +125,7 @@ def process_user_input(text: str):
     with st.spinner("處理中⋯⋯"):
         result = st.session_state.game.process_input(text)
 
-    st.session_state.messages.append(("system", result["story"]))
+    st.session_state.messages.append(("system", result["story"] if result["story"] else ""))
 
     if result["game_over"]:
         ending = st.session_state.game.get_ending_text(result["ending"])
