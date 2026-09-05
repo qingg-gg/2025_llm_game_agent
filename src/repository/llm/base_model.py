@@ -27,32 +27,6 @@ class BaseAgent:
         """呼叫 LLM，如果呼叫失敗會回傳 None"""
         try:
             headers = {
-<<<<<<< HEAD
-                "Authorization": f"Bearer {self.api_key}",
-                "Content-Type": "application/json",
-            }
-            data = {
-                "model": "gemma3:4b",
-                "prompt": prompt,
-                "temperature": temperature,
-                "stream": True
-            }
-            self._log("【API】", "發送請求...")
-            response = requests.post(self.api_url, headers = headers, json = data, stream = True, timeout = (10, 60))
-            response.raise_for_status()
-            chunks = []
-            for line in response.iter_lines(decode_unicode = True):
-                if not line:
-                    continue
-                data = json.loads(line)
-                delta = data.get("response")
-                if delta:
-                    chunks.append(delta)
-                if data.get("done"):
-                    break
-            self._log("【API】", "回應成功！")
-            return "".join(chunks)
-=======
                 "x-goog-api-key": self.api_key,
                 "Content-Type": "application/json",
             }
@@ -71,7 +45,6 @@ class BaseAgent:
                     break
             self._log("【API】", "回應成功！")
             return result
->>>>>>> d40251f (Change the llm model.)
 
         except requests.exceptions.Timeout:
             self._log("【API】", "請求超時。")
