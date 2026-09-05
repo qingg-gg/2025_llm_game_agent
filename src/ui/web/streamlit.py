@@ -29,7 +29,7 @@ st.markdown("""
         [data-testid = "stHeadingWithActionElements"]{color: #ffffff;}
         [data-testid = "stCaptionContainer"]{color: #ffffff;}
         [data-testid = "stHeading"]{color: #ffffff;}
-        [data-testid = "stWidgetLabel"]{color: #ffffff;}]
+        [data-testid = "stWidgetLabel"]{color: #ffffff;}
         [data-testid = "stBottom"]{background-color: #0f0f1e !important;}
         [data-testid = "stBottomBlockContainer"]{background-color: #0f0f1e !important;}
         [data-testid = "stMarkdown"]{color: #ffffff;}

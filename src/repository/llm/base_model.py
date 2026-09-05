@@ -27,6 +27,7 @@ class BaseAgent:
         """呼叫 LLM，如果呼叫失敗會回傳 None"""
         try:
             headers = {
+<<<<<<< HEAD
                 "Authorization": f"Bearer {self.api_key}",
                 "Content-Type": "application/json",
             }
@@ -51,6 +52,26 @@ class BaseAgent:
                     break
             self._log("【API】", "回應成功！")
             return "".join(chunks)
+=======
+                "x-goog-api-key": self.api_key,
+                "Content-Type": "application/json",
+            }
+            data = {
+                "model": "gemini-3.5-flash-lite",
+                "input": prompt
+            }
+            self._log("【API】", "發送請求...")
+            response = requests.post(self.api_url, headers = headers, json = data, timeout = (10, 60))
+            response.raise_for_status()
+            data = response.json()
+            result = None
+            for step in data["steps"]:
+                if step.get("type") == "model_output":
+                    result = step["content"][0]["text"]
+                    break
+            self._log("【API】", "回應成功！")
+            return result
+>>>>>>> d40251f (Change the llm model.)
 
         except requests.exceptions.Timeout:
             self._log("【API】", "請求超時。")
