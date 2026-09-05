@@ -1,10 +1,5 @@
 ## 文字冒險遊戲（LLM API used）
-
-<<<<<<< HEAD
-這個專案使用 NetDB Lab 提供的 LLM API，實作一套由兩個 Agent 協作的文字冒險遊戲引擎。<br>
-=======
 這個專案使用 Gemini API，實作一套由兩個 Agent 協作的文字冒險遊戲引擎。<br>
->>>>>>> d40251f (Change the llm model.)
 本專案作為計算理論課程之期末報告使用，展示課程所學之有限狀態機運作情形。
 
 ### 功能
